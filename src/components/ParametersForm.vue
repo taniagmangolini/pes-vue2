@@ -1,0 +1,206 @@
+<template>
+ <form method="POST" enctype="multipart/form-data">
+  <div class="card">
+    <div class="card-content">
+
+        <div class="file has-name is-fullwidth" >
+            <label class="file-label">
+                <input class="file-input" type="file" @change="onFileChanged" >
+                    <span class="file-cta">
+                        <span class="file-icon">
+                            <i class="fas fa-upload"></i>
+                        </span>
+                        <span class="file-label">
+                            Choose a file…
+                        </span>
+                    </span>
+                <span class="file-name">
+                    {{fileName}}
+                </span>
+            </label>
+        </div>
+
+        <div class="field has-text-left">
+            <label class="label">Taxon*</label>
+            <div class="control has-text-centered">
+               <div class="select is-fullwidth">
+                            <select v-model="taxonId" name="taxonId"> 
+                                <option value="9606">Human</option>
+                                <option value="3077">Chrorella</option>
+                                <option value="3055">Chlamydomonas reinhardtii</option>
+                            </select>
+               </div>
+            </div>
+        </div>
+        <div class=" columns is-multiline">
+        <div class="column is-half field has-text-left">
+            <label class="label">Minimum Number Of Proteins*</label>
+            <div class="control has-text-centered">
+                <input class="input" type="text" name="minProteins" v-model="minProteins">
+            </div>
+        </div>  
+
+        <div class="column is-half field has-text-left">
+            <label class="label">Null Distributions*</label>
+            <div class="control has-text-centered">
+                <input class="input" type="text" name="nullDistributions" v-model="nullDistributions">
+            </div>
+        </div>       
+    </div>
+    <div class=" columns is-multiline">
+        <div class="column is-half field has-text-left">
+            <label class="label">Tolerance Factor*</label>
+            <div class="control has-text-centered">
+                <input class="input" type="text" name="toleranceFactor" v-model="toleranceFactor">
+            </div>
+        </div>  
+
+        <div class="column is-half field has-text-left">
+            <label class="label">P-Value*</label>
+            <div class="control has-text-centered">
+                <input class="input" type="text" name="pvalue" v-model="pvalue">
+            </div>
+        </div>  
+    </div>
+        <div class=" columns is-multiline">
+            <div class="column is-half has-text-left" >
+                <a class="button is-link" @click="send">Submit</a>
+            </div>
+             <div class="column is-half has-text-right" >
+                <download-excel
+	                class   = "btn btn-default"
+                    :data   = "json_data"
+	                :fields = "json_fields"
+	                name    = "result.xls">
+                    Download the result:  <i class="fa fa-file-excel-o" style="font-size:30px;color:green;"></i>
+                </download-excel>
+            </div>
+        </div>
+
+    </div>
+  </div>
+
+  </form>
+</template>
+
+<script>
+import axios from 'axios';
+
+export default {
+  data: function () {
+      return {
+        message: 'Olá Vue2!',
+        file: null,
+        fileName: '',
+        minProteins: '',
+        toleranceFactor: '',
+        nullDistributions: '',
+        pvalue: '',
+        taxonId: '',
+        json_data: [ ],
+        json_meta: [[{
+				"key": "charset",
+				"value": "utf-8"
+		}]],
+        json_fields: {
+            'conditionName': 'conditionName',
+            'goId': 'goId',
+            'geneName': 'geneName',
+            'qualifier': 'qualifier',
+            'aspect ' : 'aspect',
+            'pvalue ' : 'pvalue',
+            'qvalue ' : 'qvalue',
+            'rank ' : 'rank',
+            'weight ' : 'weight',
+            'core ' : 'core'
+        },
+      }
+  },
+  methods: {
+    onFileChanged (event) {
+     console.log("entrou onFileChanged");
+     this.file = event.target.files[0]
+     this.fileName = this.file.name;
+    },
+    async send() {
+        console.log("entrou");
+        console.log("file: " + this.file);
+        console.log("nullDistributions: " + this.nullDistributions);
+        console.log("taxonId: " + this.taxonId);
+        console.log("minProteins: " + this.minProteins);
+        console.log("pvalue: " + this.pvalue);
+        console.log("toleranceFactor: " + this.toleranceFactor);
+
+        let options = { //emulateJSON: true,
+                        //emulateHTTP: true,
+                        //'timeout': 300000,
+                        'Content-Type': 'multipart/form-data'  };
+
+        var formData = new FormData(); 
+        formData.append('file', this.file); 
+        formData.append('nullDistributions', this.nullDistributions); 
+        formData.append('taxonId', this.taxonId); 
+        formData.append('minProteins', this.minProteins); 
+        formData.append('pvalue', this.pvalue); 
+        formData.append('toleranceFactor', this.toleranceFactor); 
+
+/*const getBreeds = () => {
+ try {
+    return axios.post('http://pes-pes.1d35.starter-us-east-1.openshiftapps.com//spring-boot-rest-0.0.1-SNAPSHOT/pes/map', formData, options )
+  } catch (error) {
+    console.error(error)
+  }
+}
+const countBreeds = async () => {
+  const breeds = getBreeds()
+    .then(response => {
+      if (response.data.message) {
+        console.log(
+          `Got ${Object.entries(response.data)} breeds`
+        )
+      }
+    })
+    .catch(error => {
+      console.log(error)
+    })
+}
+
+countBreeds();
+*/
+        //axios.post('http://127.0.0.1:8081/spring-boot-rest-0.0.1-SNAPSHOT/pes/map', formData, options )
+         axios.post('http://pes-pes.1d35.starter-us-east-1.openshiftapps.com//spring-boot-rest-0.0.1-SNAPSHOT/pes/map', formData, options )
+            .then(response => { 
+
+            for(var item in response.data){
+
+                let jsonAsString = JSON.stringify(response.data[item]);
+
+                let parsed = JSON.parse(jsonAsString);
+                
+                for(var condition in parsed){
+                    let conditionAsString = JSON.stringify(parsed[condition]);
+                    console.log("conditionAsString" + conditionAsString);
+                    let conditionAsObj = JSON.parse(conditionAsString);
+                    //console.log("conditionAsObj" + conditionAsObj);
+                    this.json_data.push(conditionAsObj);
+                }
+             }
+            })
+            .catch(e => {
+                console.log(e);
+            })
+         
+            
+    }
+  }
+}
+</script>
+
+<style>
+.card {
+  border-radius: 10px;
+}
+.card-header-title {
+  color: #636368;
+}
+</style>
