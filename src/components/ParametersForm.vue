@@ -64,9 +64,9 @@
     </div>
         <div class=" columns is-multiline">
             <div class="column is-half has-text-left" >
-                <a class="button is-link" @click="send">Submit</a>
+                <a class="button is-link" @click="send" v-bind:disabled="disabled">Submit</a>
             </div>
-             <div class="column is-half has-text-right" >
+             <div class="column is-half has-text-right" v-if="!loading && ready">
                 <download-excel
 	                class   = "btn btn-default"
                     :data   = "json_data"
@@ -76,7 +76,7 @@
                 </download-excel>
             </div>
         </div>
-
+        {{errorMsg}}
     </div>
   </div>
 
@@ -89,7 +89,9 @@ import axios from 'axios';
 export default {
   data: function () {
       return {
-        message: 'Olá Vue2!',
+        disabled: false,
+        loading: false,
+        ready : false ,
         file: null,
         fileName: '',
         minProteins: '',
@@ -123,7 +125,19 @@ export default {
      this.fileName = this.file.name;
     },
     async send() {
-        console.log("entrou");
+
+        this.loading = true;
+
+        this.ready = false;
+
+        this.json_data = [ ];
+
+        this.disabled = true;
+
+        let error = false;
+
+        let errorMsg = '';
+
         console.log("file: " + this.file);
         console.log("nullDistributions: " + this.nullDistributions);
         console.log("taxonId: " + this.taxonId);
@@ -131,66 +145,91 @@ export default {
         console.log("pvalue: " + this.pvalue);
         console.log("toleranceFactor: " + this.toleranceFactor);
 
-        let options = { //emulateJSON: true,
+        if(this.file == '' || this.file == null || this.file == undefined) {
+            errorMsg = ' Is necessary to upload a file!' + '\n';
+             error = true;
+        }
+
+        if(this.taxonId == '' || this.taxonId == null || this.taxonId == undefined){
+            errorMsg = errorMsg  + ' Is necessary to select the taxon' + '\n';
+            error = true;
+        }
+
+        
+        if(this.minProteins == '' || this.minProteins == null || this.minProteins == undefined || isNaN(this.minProteins) || this.minProteins <= 0 ) {
+            errorMsg = errorMsg + ' Is necessary to set a valid minimum number of proteins! '  + '\n';
+            error = true;
+        }
+
+        if(this.nullDistributions == '' || this.nullDistributions == null || this.nullDistributions == undefined || isNaN(this.nullDistributions) || this.nullDistributions < 0) {
+            errorMsg = errorMsg + ' Is necessary to set a valid number of null distributions! ' + '\n';
+            error = true;
+        }
+
+        if(this.toleranceFactor == '' || this.toleranceFactor == null || this.toleranceFactor == undefined || isNaN(this.toleranceFactor) || (this.toleranceFactor < 0 && this.toleranceFactor > 1) ){
+            errorMsg = errorMsg + ' Is necessary to inform a valid tolerance factor! ' + '\n';
+            error = true;
+        }
+
+        if(this.pvalue == '' || this.pvalue == null || this.pvalue == undefined || isNaN(this.pvalue) || this.pvalue > 1) {
+            errorMsg = errorMsg + ' Is necessary to inform a valid pvalue! ' + '\n';
+            error = true;
+        }
+
+
+        if(error) {
+
+            alert(errorMsg);
+
+            this.loading = false;
+            this.ready = false;
+            this.disabled = false;
+
+        } else {
+
+
+            let options = { //emulateJSON: true,
                         //emulateHTTP: true,
                         //'timeout': 300000,
                         'Content-Type': 'multipart/form-data'  };
 
-        var formData = new FormData(); 
-        formData.append('file', this.file); 
-        formData.append('nullDistributions', this.nullDistributions); 
-        formData.append('taxonId', this.taxonId); 
-        formData.append('minProteins', this.minProteins); 
-        formData.append('pvalue', this.pvalue); 
-        formData.append('toleranceFactor', this.toleranceFactor); 
+            var formData = new FormData(); 
+            formData.append('file', this.file); 
+            formData.append('nullDistributions', this.nullDistributions); 
+            formData.append('taxonId', this.taxonId); 
+            formData.append('minProteins', this.minProteins); 
+            formData.append('pvalue', this.pvalue); 
+            formData.append('toleranceFactor', this.toleranceFactor); 
 
-/*const getBreeds = () => {
- try {
-    return axios.post('http://pes-pes.1d35.starter-us-east-1.openshiftapps.com//spring-boot-rest-0.0.1-SNAPSHOT/pes/map', formData, options )
-  } catch (error) {
-    console.error(error)
-  }
-}
-const countBreeds = async () => {
-  const breeds = getBreeds()
-    .then(response => {
-      if (response.data.message) {
-        console.log(
-          `Got ${Object.entries(response.data)} breeds`
-        )
-      }
-    })
-    .catch(error => {
-      console.log(error)
-    })
-}
+            //axios.post('http://127.0.0.1:8081/spring-boot-rest-0.0.1-SNAPSHOT/pes/map', formData, options )
+            axios.post('http://pes-pes.1d35.starter-us-east-1.openshiftapps.com//spring-boot-rest-0.0.1-SNAPSHOT/pes/map', formData, options )
+                .then(response => { 
 
-countBreeds();
-*/
-        //axios.post('http://127.0.0.1:8081/spring-boot-rest-0.0.1-SNAPSHOT/pes/map', formData, options )
-         axios.post('http://pes-pes.1d35.starter-us-east-1.openshiftapps.com//spring-boot-rest-0.0.1-SNAPSHOT/pes/map', formData, options )
-            .then(response => { 
+                for(var item in response.data){
 
-            for(var item in response.data){
+                    let jsonAsString = JSON.stringify(response.data[item]);
 
-                let jsonAsString = JSON.stringify(response.data[item]);
-
-                let parsed = JSON.parse(jsonAsString);
+                    let parsed = JSON.parse(jsonAsString);
                 
-                for(var condition in parsed){
-                    let conditionAsString = JSON.stringify(parsed[condition]);
-                    console.log("conditionAsString" + conditionAsString);
-                    let conditionAsObj = JSON.parse(conditionAsString);
-                    //console.log("conditionAsObj" + conditionAsObj);
-                    this.json_data.push(conditionAsObj);
+                    for(var condition in parsed){
+                        let conditionAsString = JSON.stringify(parsed[condition]);
+                        console.log("conditionAsString" + conditionAsString);
+                        let conditionAsObj = JSON.parse(conditionAsString);
+                        //console.log("conditionAsObj" + conditionAsObj);
+                        this.json_data.push(conditionAsObj);
+                    }
                 }
-             }
-            })
-            .catch(e => {
-                console.log(e);
-            })
-         
-            
+                    this.loading = false;
+                    this.ready = true;
+                    this.disabled = false;
+                })
+                .catch(e => {
+                    this.loading = false;
+                    this.disabled = false;
+                    this.ready = false;
+                    console.log(e);
+                })
+        }
     }
   }
 }
