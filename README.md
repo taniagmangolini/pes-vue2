@@ -47,7 +47,8 @@ npm run dev
 #to build
 npm run build
 
-#start server
+#start server           
+
 node server.js
 
 
