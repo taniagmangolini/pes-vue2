@@ -207,9 +207,11 @@ export default {
             formData.append('minProteins', this.minProteins); 
             formData.append('pvalue', this.pvalue); 
             formData.append('toleranceFactor', this.toleranceFactor); 
-
+            
+            const url = 'http://pes-pes.1d35.starter-us-east-1.openshiftapps.com/spring-boot-rest-0.0.1-SNAPSHOT/pes/map';
             //axios.post('http://127.0.0.1:8081/spring-boot-rest-0.0.1-SNAPSHOT/pes/map', formData, options )
-            axios.post('http://pes-pes.1d35.starter-us-east-1.openshiftapps.com/spring-boot-rest-0.0.1-SNAPSHOT/pes/map', formData, options )
+
+            axios.post(url, formData, options )
                 .then(response => { 
 
                 for(var item in response.data){
