@@ -25,9 +25,14 @@
             <div class="control has-text-centered">
                <div class="select is-fullwidth">
                             <select v-model="taxonId" name="taxonId"> 
-                                <option value="9606">Human</option>
                                 <option value="3077">Chrorella</option>
                                 <option value="3055">Chlamydomonas reinhardtii</option>
+                                <option value="9606">Human</option>
+                                <option value="10116">Rattus norvegicus</option>
+                                <option value="10117">Rattus rattus</option>
+                                <option value="4547">Saccharum officinarum</option>
+                                <option value="4558">Sorghum bicolor</option>
+                                <option value="4557">Zea mays</option>
                             </select>
                </div>
             </div>
@@ -45,8 +50,10 @@
             <div class="control has-text-centered">
                 <input class="input" type="text" name="nullDistributions" v-model="nullDistributions">
             </div>
-        </div>       
+        </div>  
+
     </div>
+    
     <div class=" columns is-multiline">
         <div class="column is-half field has-text-left">
             <label class="label">Tolerance Factor*</label>
