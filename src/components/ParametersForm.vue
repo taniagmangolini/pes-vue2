@@ -117,6 +117,8 @@ export default {
             'geneName': 'geneName',
             'qualifier': 'qualifier',
             'aspect ' : 'aspect',
+            'pvalueRatioAB' : 'pvalueRatioAB',
+            'pvalueRatioBA' : 'pvalueRatioBA',
             'pvalue ' : 'pvalue',
             'qvalue ' : 'qvalue',
             'rank ' : 'rank',
