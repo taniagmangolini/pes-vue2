@@ -114,6 +114,7 @@ export default {
         json_fields: {
             'conditionName': 'conditionName',
             'goId': 'goId',
+            'goName': 'goName',
             'geneName': 'geneName',
             'qualifier': 'qualifier',
             'aspect ' : 'aspect',
@@ -211,7 +212,7 @@ export default {
             formData.append('toleranceFactor', this.toleranceFactor); 
             
             //const url = 'http://pes-pes.1d35.starter-us-east-1.openshiftapps.com/spring-boot-rest-0.0.1-SNAPSHOT/pes/map';
-            const url = 'http://127.0.0.1:8081/spring-boot-rest-0.0.1-SNAPSHOT/pes/map';
+            const url = 'http://127.0.0.1:8083/spring-boot-rest-0.0.1-SNAPSHOT/pes/map';
 
             axios.post(url, formData, options )
                 .then(response => { 
